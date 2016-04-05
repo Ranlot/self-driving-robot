@@ -25,7 +25,7 @@ def localize(measurement, probSensorIsRight, coLoc):
 
 def shift(locationRow, n, move):
 	if move == 'right':	pivot = len(locationRow) - n
-	else:				pivot = n
+	else:			pivot = n
 	return locationRow[pivot::] + locationRow[:pivot:]
 
 def horizontalMove(locationRow, move, probMoveIsSuccessful):
