@@ -1,4 +1,5 @@
 import itertools
+import operator
 #------------------------------------------------
 def overlayWorldMap(locationProbs):
 	return map(lambda row: zip(worldMap[row], locationProbs[row]), range(sizeVertical))
@@ -30,7 +31,7 @@ def shift(locationRow, n, move):
 def horizontalMove(locationRow, move, probMoveIsSuccessful):
 	failedMove = map(lambda cell: (1 - probMoveIsSuccessful) * cell, locationRow)
 	successfulMove = map(lambda cell: probMoveIsSuccessful * cell, shift(locationRow, 1, move))
-	return [x + y for (x, y) in zip(failedMove, successfulMove)]
+	return map(operator.add, failedMove, successfulMove)
 
 def locationFlipper(locationProbs):
 	return map(list, zip(*locationProbs))
