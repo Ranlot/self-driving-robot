@@ -1,7 +1,7 @@
 import itertools
 #------------------------------------------------
-def interLeaver(locationGrid):
-	return map(lambda row: zip(worldMap[row], locationGrid[row]), range(sizeVertical))
+def overlayWorldMap(locationProbs):
+	return map(lambda row: zip(worldMap[row], locationProbs[row]), range(sizeVertical))
 
 def deInterLeaver(coLocationGrid):
 	return [map(lambda cell: cell[1], row) for row in coLocationGrid]
@@ -13,49 +13,49 @@ def measurementProcessor(measurement, probSensorIsRight):
 	return processRow
 
 #using numpy array would look more simple, yes...???
-def locationNormalizer(locationMatrix):
-	normalizingConstant, sizeVertical = sum(map(sum, locationMatrix)), len(locationMatrix)
+def locationNormalizer(locationProbs):
+	normalizingConstant, sizeVertical_t = sum(map(sum, locationProbs)), len(locationProbs)
 	if normalizingConstant == 0.0:	raise ValueError('worldMap probably inconsistent with measurements & moves')
-	return [map(lambda cell: cell / normalizingConstant, locationMatrix[row]) for row in range(sizeVertical)]	
+	return [map(lambda cell: cell / normalizingConstant, locationProbs[row]) for row in range(sizeVertical_t)]
 
 def localize(measurement, probSensorIsRight, coLoc):
 	newLocation = locationNormalizer(map(measurementProcessor(measurement, probSensorIsRight), coLoc))
 	return newLocation
 
-def shift(locationRow, n, direction):
-	if direction == 'right':	pivot = len(locationRow) - n
+def shift(locationRow, n, move):
+	if move == 'right':	pivot = len(locationRow) - n
 	else:				pivot = n
 	return locationRow[pivot::] + locationRow[:pivot:]
 
-def horizontalMove(locationRow, direction, probMoveIsSuccessful):
+def horizontalMove(locationRow, move, probMoveIsSuccessful):
 	failedMove = map(lambda cell: (1 - probMoveIsSuccessful) * cell, locationRow)
-	successfulMove = map(lambda cell: probMoveIsSuccessful * cell, shift(locationRow, 1, direction))
+	successfulMove = map(lambda cell: probMoveIsSuccessful * cell, shift(locationRow, 1, move))
 	return [x + y for (x, y) in zip(failedMove, successfulMove)]
 
-def locationFlipper(locationMatrix):
-	return map(list, zip(*locationMatrix))
+def locationFlipper(locationProbs):
+	return map(list, zip(*locationProbs))
 	
-def executeMove(move, locationMatrix):
+def executeMove(move, locationProbs):
 	if move == 'stay':
-		return locationMatrix
+		return locationProbs
 	if move == 'left' or move == 'right':		
-		return locationNormalizer(map(lambda locationRow: horizontalMove(locationRow, move, probMoveIsSuccessful), locationMatrix))
+		return locationNormalizer(map(lambda locationRow: horizontalMove(locationRow, move, probMoveIsSuccessful), locationProbs))
 	elif move == 'up' or move == 'down':
-		transposeLocationMatrix, transposeMove = locationFlipper(locationMatrix), 'right' if move == 'down' else 'left'
+		transposeLocationMatrix, transposeMove = locationFlipper(locationProbs), 'right' if move == 'down' else 'left'
 		transposedResult = locationNormalizer(map(lambda locationRow: horizontalMove(locationRow, transposeMove, probMoveIsSuccessful), transposeLocationMatrix))
 		return map(list, zip(*transposedResult))
 	else:
 		raise ValueError('move not supported')
 
-def locationPrinter(locationMatrix, debug=False):
-	if debug:	locationPrint = interLeaver(locationMatrix)
-	else:		locationPrint = locationMatrix
+def locationPrinter(locationProbs, debug=False):
+	if debug:	locationPrint = overlayWorldMap(locationProbs)
+	else:		locationPrint = locationProbs
 	for cell in locationPrint:	print cell
 	print '\n'
 
-def step(move, measurement, locationMatrix):
-	makeTheMove = executeMove(move, locationMatrix)
-	posteriorLocation = localize(measurement, probSensorIsRight, interLeaver(makeTheMove))
+def step(move, measurement, locationProbs):
+	locationAfterMove = executeMove(move, locationProbs)
+	posteriorLocation = localize(measurement, probSensorIsRight, overlayWorldMap(locationAfterMove))
 	locationPrinter(posteriorLocation, True)
 	return posteriorLocation
 #------------------------------------------------
