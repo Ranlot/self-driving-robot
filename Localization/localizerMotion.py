@@ -1,5 +1,11 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 import itertools
 import operator
+import seaborn as sns
+import numpy as np
 #------------------------------------------------
 def overlayWorldMap(locationProbs):
 	return map(lambda row: zip(worldMap[row], locationProbs[row]), range(sizeVertical))
@@ -48,16 +54,24 @@ def executeMove(move, locationProbs):
 	else:
 		raise ValueError('move not supported')
 
-def locationPrinter(locationProbs, debug=False):
+# there is an open seaborn bug regarding ticklabels
+# https://github.com/mwaskom/seaborn/issues/837
+# maybe make provide a PR
+def locationPrinter(locationProbs, message, debug=False):
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	plt.title('%s' % message)
+	ax = sns.heatmap(np.array(locationProbs), annot=True, cmap="YlGnBu", linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
+	fig.savefig('%s.png' % message)
 	if debug:	locationPrint = overlayWorldMap(locationProbs)
 	else:		locationPrint = locationProbs
 	for cell in locationPrint:	print cell
 	print '\n'
 
-def step(move, measurement, locationProbs):
+def step(move, measurement, locationProbs, message):
 	locationAfterMove = executeMove(move, locationProbs)
 	posteriorLocation = localize(measurement, probSensorIsRight, overlayWorldMap(locationAfterMove))
-	locationPrinter(posteriorLocation, True)
+	locationPrinter(posteriorLocation, message, True)
 	return posteriorLocation
 #------------------------------------------------
 worldMap = [['R', 'G', 'G', 'R', 'R'], ['R', 'R', 'G', 'R', 'R'], ['R', 'R', 'G', 'G', 'R'], ['R', 'R', 'R', 'R', 'R']]
@@ -75,10 +89,10 @@ flatLandscape = list(itertools.repeat(flatRow, sizeVertical))
 measurements = ['R']
 motions = [[0, 0]]
 #------------------------------------------------
-locationPrinter(flatLandscape, True)
-l0 = step('stay', 'G', flatLandscape)
-l1 = step('right', 'G', l0)
-l2 = step('down', 'G', l1)
-l3 = step('down', 'G', l2)
-l4 = step('right', 'G', l3)
+locationPrinter(flatLandscape, 'INITIAL-0', True)
+l0 = step('stay', 'G', flatLandscape, 'STAY-1')
+l1 = step('right', 'G', l0, 'RIGHT-2')
+l2 = step('down', 'G', l1, 'DOWN-3')
+l3 = step('down', 'G', l2, 'DOWN-4')
+l4 = step('right', 'G', l3, 'RIGHT-5')
 #------------------------------------------------
