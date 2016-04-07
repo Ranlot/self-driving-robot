@@ -88,9 +88,8 @@ ax = fig.add_subplot(111, aspect=1.1)
 worldMapForPlot = [map(lambda cell: 0 if cell == 'R' else 1, row) for row in worldMap]
 plt.title('World Map')
 ax = sns.heatmap(np.array(worldMapForPlot), cmap=ListedColormap(['red', 'green']), annot=False, cbar=True, linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
-fig.savefig('worldMap.png')
+fig.savefig('Animation/worldMap.png')
 plt.close()
-#imageio.imwrite('worldMap.gif', imageio.imread('WorldMap/worldMap.png'))
 #------------------------------------------------
 probSensorIsRight = 0.7
 probMoveIsSuccessful = 0.8
@@ -110,5 +109,5 @@ l3 = step('down', 'G', l2, '4-DOWN')
 l4 = step('right', 'G', l3, '5-RIGHT')
 #------------------------------------------------
 allFrames = map(lambda img: imageio.imread(img), sorted(glob.glob('Frames/*.png'), key = lambda frame: int(frame.split('/')[1].split('-')[0])))
-imageio.mimwrite('animatedLocalizer.gif', allFrames, duration=[1.5]*len(allFrames))
+imageio.mimwrite('Animation/animatedLocalizer.gif', allFrames, duration=[1.5]*len(allFrames))
 #------------------------------------------------
