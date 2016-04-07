@@ -98,9 +98,6 @@ flatInitProb = 1 / (float(sizeHorizontal * sizeVertical))
 flatRow = [flatInitProb for cell in range(sizeHorizontal)]
 flatLandscape = list(itertools.repeat(flatRow, sizeVertical))
 #------------------------------------------------
-measurements = ['R']
-motions = [[0, 0]]
-#------------------------------------------------
 locationPrinter(flatLandscape, '0-INITIAL', True)
 l0 = step('stay', 'G', flatLandscape, '1-STAY')
 l1 = step('right', 'G', l0, '2-RIGHT')
