@@ -6,6 +6,8 @@ import itertools
 import operator
 import seaborn as sns
 import numpy as np
+import glob
+import imageio
 #------------------------------------------------
 def overlayWorldMap(locationProbs):
 	return map(lambda row: zip(worldMap[row], locationProbs[row]), range(sizeVertical))
@@ -62,7 +64,7 @@ def locationPrinter(locationProbs, message, debug=False):
 	ax = fig.add_subplot(111)
 	plt.title('%s' % message)
 	ax = sns.heatmap(np.array(locationProbs), annot=True, cmap="YlGnBu", linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
-	fig.savefig('%s.png' % message)
+	fig.savefig('Frames/%s.png' % message)
 	if debug:	locationPrint = overlayWorldMap(locationProbs)
 	else:		locationPrint = locationProbs
 	for cell in locationPrint:	print cell
@@ -89,10 +91,13 @@ flatLandscape = list(itertools.repeat(flatRow, sizeVertical))
 measurements = ['R']
 motions = [[0, 0]]
 #------------------------------------------------
-locationPrinter(flatLandscape, 'INITIAL-0', True)
-l0 = step('stay', 'G', flatLandscape, 'STAY-1')
-l1 = step('right', 'G', l0, 'RIGHT-2')
-l2 = step('down', 'G', l1, 'DOWN-3')
-l3 = step('down', 'G', l2, 'DOWN-4')
-l4 = step('right', 'G', l3, 'RIGHT-5')
+locationPrinter(flatLandscape, '0-INITIAL', True)
+l0 = step('stay', 'G', flatLandscape, '1-STAY')
+l1 = step('right', 'G', l0, '2-RIGHT')
+l2 = step('down', 'G', l1, '3-DOWN')
+l3 = step('down', 'G', l2, '4-DOWN')
+l4 = step('right', 'G', l3, '5-RIGHT')
+#------------------------------------------------
+allFrames = map(lambda img: imageio.imread(img), sorted(glob.glob('Frames/*.png'), key = lambda frame: int(frame.split('/')[1].split('-')[0])))
+imageio.mimwrite('animatedLocalizer.gif', allFrames, duration=[1.0]*len(allFrames))
 #------------------------------------------------
