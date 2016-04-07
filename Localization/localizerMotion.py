@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 import itertools
 import operator
@@ -80,6 +81,12 @@ worldMap = [['R', 'G', 'G', 'R', 'R'], ['R', 'R', 'G', 'R', 'R'], ['R', 'R', 'G'
 #------------------------------------------------
 sizeHorizontal, sizeVertical = len(worldMap[0]), len(worldMap)
 assert [len(row) for row in worldMap] == [sizeHorizontal] * sizeVertical
+#------------------------------------------------
+fig = plt.figure()
+ax = fig.add_subplot(111)
+worldMapForPlot = [map(lambda cell: 0 if cell == 'R' else 1, row) for row in worldMap]
+ax = sns.heatmap(np.array(worldMapForPlot), cmap=ListedColormap(['red', 'green']), cbar=False, linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
+fig.savefig('worldMap.png')
 #------------------------------------------------
 probSensorIsRight = 0.7
 probMoveIsSuccessful = 0.8
