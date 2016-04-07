@@ -66,6 +66,7 @@ def locationPrinter(locationProbs, message, debug=False):
 	plt.title('%s' % message)
 	ax = sns.heatmap(np.array(locationProbs), annot=True, cmap="YlGnBu", linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
 	fig.savefig('Frames/%s.png' % message)
+	plt.close()
 	if debug:	locationPrint = overlayWorldMap(locationProbs)
 	else:		locationPrint = locationProbs
 	for cell in locationPrint:	print cell
@@ -83,10 +84,13 @@ sizeHorizontal, sizeVertical = len(worldMap[0]), len(worldMap)
 assert [len(row) for row in worldMap] == [sizeHorizontal] * sizeVertical
 #------------------------------------------------
 fig = plt.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(111, aspect=1.1)
 worldMapForPlot = [map(lambda cell: 0 if cell == 'R' else 1, row) for row in worldMap]
-ax = sns.heatmap(np.array(worldMapForPlot), cmap=ListedColormap(['red', 'green']), cbar=False, linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
-fig.savefig('worldMap.png')
+plt.title('World Map')
+ax = sns.heatmap(np.array(worldMapForPlot), cmap=ListedColormap(['red', 'green']), annot=False, cbar=True, linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
+fig.savefig('WorldMap/worldMap.png')
+plt.close()
+imageio.imwrite('worldMap.gif', imageio.imread('WorldMap/worldMap.png'))
 #------------------------------------------------
 probSensorIsRight = 0.7
 probMoveIsSuccessful = 0.8
@@ -106,5 +110,5 @@ l3 = step('down', 'G', l2, '4-DOWN')
 l4 = step('right', 'G', l3, '5-RIGHT')
 #------------------------------------------------
 allFrames = map(lambda img: imageio.imread(img), sorted(glob.glob('Frames/*.png'), key = lambda frame: int(frame.split('/')[1].split('-')[0])))
-imageio.mimwrite('animatedLocalizer.gif', allFrames, duration=[1.0]*len(allFrames))
+imageio.mimwrite('animatedLocalizer.gif', allFrames, duration=[1.5]*len(allFrames))
 #------------------------------------------------
