@@ -11,7 +11,7 @@ import imageio
 
 from helperFunctions import *
 #------------------------------------------------
-worldMap = [['R', 'G', 'G', 'R', 'R'], ['R', 'R', 'G', 'R', 'R'], ['R', 'R', 'G', 'G', 'R'], ['R', 'R', 'R', 'R', 'R']]
+worldMap = [['red', 'green', 'green', 'red', 'red'], ['red', 'red', 'green', 'red', 'red'], ['red', 'red', 'green', 'green', 'red'], ['red', 'red', 'red', 'red', 'red']]
 #------------------------------------------------
 sizeHorizontal, sizeVertical = len(worldMap[0]), len(worldMap)
 assert [len(row) for row in worldMap] == [sizeHorizontal] * sizeVertical
@@ -31,15 +31,15 @@ flatInitProb = 1 / (float(sizeHorizontal * sizeVertical))
 flatRow = [flatInitProb for cell in range(sizeHorizontal)]
 flatLandscape = list(itertools.repeat(flatRow, sizeVertical))
 #------------------------------------------------
-locationPrinter(worldMap, flatLandscape, '0-INITIAL', True)
+locationPrinter(worldMap, flatLandscape, '0-initial', True)
 #------------------------------------------------
 step = generalStep(probMoveIsSuccessful, probSensorIsRight, worldMap)
 #------------------------------------------------
-l0 = step('stay', 'G', flatLandscape, '1-STAY')
-l1 = step('right', 'G', l0, '2-RIGHT')
-l2 = step('down', 'G', l1, '3-DOWN')
-l3 = step('down', 'G', l2, '4-DOWN')
-l4 = step('right', 'G', l3, '5-RIGHT')
+l0 = step('stay', 'green', flatLandscape, '1-stay-green')
+l1 = step('right', 'green', l0, '2-right-green')
+l2 = step('down', 'green', l1, '3-down-green')
+l3 = step('down', 'green', l2, '4-down-green')
+l4 = step('right', 'green', l3, '5-right-green')
 #------------------------------------------------
 allFrames = map(lambda img: imageio.imread(img), sorted(glob.glob('Frames/*.png'), key = lambda frame: int(frame.split('/')[1].split('-')[0])))
 imageio.mimwrite('Animation/animatedLocalizer.gif', allFrames, duration=[1.5]*len(allFrames))

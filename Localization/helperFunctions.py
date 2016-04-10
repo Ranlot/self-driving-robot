@@ -71,11 +71,11 @@ def locationPrinter(worldMap, locationProbs, message, debug=False):
 
 def generalStep(probMoveIsSuccessful, probSensorIsRight, worldMap):
 	def step(move, measurement, locationProbs, message):
+		if measurement not in ['green', 'red']:
+			raise ValueError('color does not exist')
 		locationAfterMove = executeMove(move, probMoveIsSuccessful, locationProbs)
 		posteriorLocation = localize(measurement, probSensorIsRight, overlayWorldMap(worldMap, locationAfterMove))
 		locationPrinter(worldMap, posteriorLocation, message, True)
 		return posteriorLocation
 	return step
-
-
 
