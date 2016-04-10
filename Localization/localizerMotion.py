@@ -18,7 +18,7 @@ assert [len(row) for row in worldMap] == [sizeHorizontal] * sizeVertical
 #------------------------------------------------
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect=1.1)
-worldMapForPlot = [map(lambda cell: 0 if cell == 'R' else 1, row) for row in worldMap]
+worldMapForPlot = [map(lambda cell: 0 if cell == 'red' else 1, row) for row in worldMap]
 plt.title('World Map')
 ax = sns.heatmap(np.array(worldMapForPlot), cmap=ListedColormap(['red', 'green']), annot=False, cbar=True, linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
 fig.savefig('Animation/worldMap.png')
