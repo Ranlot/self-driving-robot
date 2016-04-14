@@ -1,2 +1,4 @@
-Localization/refactor/
-Localization/*.pyc
+HistogramFilter/refactor/
+HistogramFilter/*.pyc
+KalmanFilter/toyExample/
+KalmanFilter/*.pyc
