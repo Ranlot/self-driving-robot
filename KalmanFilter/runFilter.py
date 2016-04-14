@@ -42,6 +42,8 @@ identityMatrix = matrix([[1., 0.], [0., 1.]])
 # x: [[3.9996664447958645], [0.9999998335552873]]
 # P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
 
+
+#TODO: make all this nicer with recursion and without mutated variables
 for measurement in measurements:
 	currentEstimate, currentUncertainty = kalmanFilter(measurement, currentEstimate, currentUncertainty)
 	print currentEstimate, currentUncertainty

@@ -1,5 +1,4 @@
-# Write a function 'filter' that implements a multi-
-# dimensional Kalman Filter for the example given
+# copy/paste matrix class as given in the online course
 
 from math import *
 
