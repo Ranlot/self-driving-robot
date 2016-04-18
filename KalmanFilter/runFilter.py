@@ -10,7 +10,6 @@ def estimateBasedOnMeasurement(currentEstimate, currentUncertainty, measurement,
 
 	return updatedEstimate, updatedUncertainty
 
-
 def makePrediction(currentEstimate, currentUncertainty, stateTransitionMatrix, externalBias):
 	updatedEstimate	= stateTransitionMatrix * currentEstimate + externalBias
 	updatedUncertainty = stateTransitionMatrix * currentUncertainty * stateTransitionMatrix.transpose()
@@ -18,34 +17,42 @@ def makePrediction(currentEstimate, currentUncertainty, stateTransitionMatrix, e
 	return updatedEstimate, updatedUncertainty
 
 
-def kalmanFilter(measurement, currentEstimate, currentUncertainty):
-		currentEstimate, currentUncertainty = estimateBasedOnMeasurement(currentEstimate, currentUncertainty, measurement, measurementProjectionMatrix, measurementNoiseMatrix)
-		currentEstimate, currentUncertainty = makePrediction(currentEstimate, currentUncertainty, stateTransitionMatrix, externalBias)
-		return currentEstimate, currentUncertainty
+measurements = [[5., 10.], [6., 8.], [7., 6.], [8., 4.], [9., 2.], [10., 0.]]
+initialXposition, initialYposition, initialXposUncertainty, initialYposUncertainty = 4., 12., 0., 0.
+initialXvelocity, initialYvelocity, initialXvelUnvertainty, initialYvelUnvertainty = 0., 0., 1000., 1000.
 
-measurements = [1, 2, 3]
-#measurements = [1] * 1
-measurements = map(lambda measurement: matrix([[measurement]]), measurements)
+#measurements = [[1., 4.], [6., 0.], [11., -4.], [16., -8.]]
+#initialXposition, initialYposition, initialXposUncertainty, initialYposUncertainty = -4., 8., 0., 0.
+#initialXvelocity, initialYvelocity, initialXvelUnvertainty, initialYvelUnvertainty = 0., 0., 1000., 1000.
 
-currentEstimate = matrix([[0.], [0.]]) 
-currentUncertainty = matrix([[1000., 0.], [0., 1000.]]) # very high initial uncertainty on position and velocity (no correlation)
-externalBias = matrix([[0.], [0.]])
-stateTransitionMatrix = matrix([[1., 1.], [0, 1.]])
+#measurements = [[1., 17.], [1., 15.], [1., 13.], [1., 11.]]
+#initialXposition, initialYposition, initialXposUncertainty, initialYposUncertainty = 1., 19., 0., 0.
+#initialXvelocity, initialYvelocity, initialXvelUnvertainty, initialYvelUnvertainty = 0., 0., 1000., 1000.
 
-measurementProjectionMatrix = matrix([[1., 0.]]) # measurement function that can only observe the velocity
-measurementNoiseMatrix = matrix([[1.]]) # measurement uncertainty ; position only
+measurements = map(lambda measurement: matrix([measurement]), measurements)
 
-identityMatrix = matrix([[1., 0.], [0., 1.]]) 
+timeDiffBetweenMeasurements = 0.1
+noisePositionMeasurement = 0.1
 
-#print kalman_filter(x, P)
-# output should be:
-# x: [[3.9996664447958645], [0.9999998335552873]]
-# P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
+currentEstimate = matrix([[initialXposition], [initialYposition], [initialXvelocity], [initialYvelocity]]) 
+currentUncertainty = matrix([[0., 0., 0., 0.], [0., 0., 0., 0.], [0., 0., initialXvelUnvertainty, 0.], [0., 0., 0., initialYvelUnvertainty]]) 
 
+externalBias = matrix([[0.], [0.], [0.], [0.]])
+stateTransitionMatrix = matrix([[1., 0., timeDiffBetweenMeasurements, 0.], [0., 1., 0., timeDiffBetweenMeasurements], [0., 0., 1., 0.], [0., 0., 0., 1.]])
+
+measurementProjectionMatrix = matrix([[1., 0., 0., 0.], [0., 1., 0., 0.]]) # measurement function that can only observe the positions
+measurementNoiseMatrix = matrix([[noisePositionMeasurement, 0.], [0., noisePositionMeasurement]]) # measurement uncertainty ; position only
+
+identityMatrix = matrix([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]) 
+
+estimatedPositions = []
 
 #TODO: make all this nicer with recursion and without mutated variables
-for measurement in measurements:
-	currentEstimate, currentUncertainty = kalmanFilter(measurement, currentEstimate, currentUncertainty)
-	print currentEstimate, currentUncertainty
-
+print 'initial', currentEstimate
+for measurementID, measurement in enumerate(measurements):
+	#first; make a prediction about next location
+	currentEstimate, currentUncertainty = makePrediction(currentEstimate, currentUncertainty, stateTransitionMatrix, externalBias)
+	#second; adjust the estimate based on the actual measurement
+	currentEstimate, currentUncertainty = estimateBasedOnMeasurement(currentEstimate, currentUncertainty, measurement, measurementProjectionMatrix, measurementNoiseMatrix)
+	print 'new estimate', currentEstimate
 
