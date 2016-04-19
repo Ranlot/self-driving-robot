@@ -31,5 +31,5 @@ We set up the state transition matrix to tackle a very simple situation in which
 
 You can run the demo with:
 ```
-python KalmanFilter/runFilter.py
+python KalmanFilter/kalmanFilter.py
 ```
