@@ -16,6 +16,11 @@ Let's say for example that we are following the steps as in the animation (right
 <img src="HistogramFilter/Animation/animatedLocalizer.gif" width="430"/>
 </p>
 
+You can run the demo with
+```
+python HistogramFilter/localizerMotion.py
+```
+
 #### 2.b) Kalman Filter
 
 We set up the state transition matrix to tackle a very simple situation in which an object is expected to move at a fixed (but unknown) velocity in the plane.  By using a series of measurements, the Kalman Filter allows us to very quickly make a good estimate about the velocity of the object which can then be used to predict its future position.  For example, the animation shows how after 3 measurements it is possbile to predict the position x, y and velocity vx (along the horizontal axis), vy (along the vertical axis).
