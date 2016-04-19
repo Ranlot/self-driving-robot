@@ -56,26 +56,26 @@ def executeMove(move, probMoveIsSuccessful, locationProbs):
 # https://github.com/mwaskom/seaborn/issues/837
 # maybe make provide a PR
 #------------------------------------------------
-def locationPrinter(worldMap, locationProbs, message, debug=False):
+def locationPrinter(worldMap, locationProbs, message, frameDir, debug=False):
 	sizeHorizontal, sizeVertical = len(worldMap[0]), len(worldMap)
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	plt.title('%s' % message)
 	ax = sns.heatmap(np.array(locationProbs), annot=True, cmap="YlGnBu", linecolor='k', linewidths=1, xticklabels=['']*sizeHorizontal, yticklabels=['']*sizeVertical)
-	fig.savefig('Frames/%s.png' % message)
+	fig.savefig('%s/%s.png' % (frameDir, message))
 	plt.close()
 	if debug:	locationPrint = overlayWorldMap(worldMap, locationProbs)
 	else:		locationPrint = locationProbs
 	for cell in locationPrint:	print cell
 	print '\n'
 
-def generalStep(probMoveIsSuccessful, probSensorIsRight, worldMap):
+def generalStep(probMoveIsSuccessful, probSensorIsRight, worldMap, frameDir):
 	def step(move, measurement, locationProbs, message):
 		if measurement not in ['green', 'red']:
 			raise ValueError('color does not exist')
 		locationAfterMove = executeMove(move, probMoveIsSuccessful, locationProbs)
 		posteriorLocation = localize(measurement, probSensorIsRight, overlayWorldMap(worldMap, locationAfterMove))
-		locationPrinter(worldMap, posteriorLocation, message, True)
+		locationPrinter(worldMap, posteriorLocation, message, frameDir, True)
 		return posteriorLocation
 	return step
 
