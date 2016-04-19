@@ -16,7 +16,7 @@ Let's say for example that we are following the steps as in the animation (right
 <img src="HistogramFilter/Animation/animatedLocalizer.gif" width="430"/>
 </p>
 
-You can run the demo with
+You can run the demo with:
 ```
 python HistogramFilter/localizerMotion.py
 ```
@@ -29,3 +29,7 @@ We set up the state transition matrix to tackle a very simple situation in which
 <img src="KalmanFilter/Animation/animatedKF.gif" width="430"/>
 </p> 
 
+You can run the demo with:
+```
+python KalmanFilter/runFilter.py
+```
