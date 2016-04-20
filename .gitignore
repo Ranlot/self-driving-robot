@@ -2,3 +2,4 @@ HistogramFilter/refactor/
 HistogramFilter/*.pyc
 KalmanFilter/toyExample/
 KalmanFilter/*.pyc
+ParticleFilter/*.pyc
