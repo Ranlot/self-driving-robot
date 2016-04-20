@@ -1,6 +1,7 @@
 #simple copy paste from class given in online course
 #modified move method not to return new robot but to mutate current robot
 #simplified constructor to avoid code duplication
+#simplified sense function
 
 from math import *
 import random
@@ -36,14 +37,15 @@ class Robot:
 		self.turn_noise = float(obj['turn'])
 		self.sense_noise = float(obj['sense'])
 
-    	def sense(self):
-        	Z = []
-        	for i in range(len(self.landmarks)):
-            		dist = sqrt((self.x - self.landmarks[i][0]) ** 2 + (self.y - self.landmarks[i][1]) ** 2)
-            		dist += random.gauss(0.0, self.sense_noise)
-            		Z.append(dist)
-        	return Z
-    
+
+	def __distanceRobotToLandmark(self, obj):
+		noiseLessEuclideanDistance = hypot(obj['robotX'] - obj['landmarkX'], obj['robotY'] - obj['landmarkY']) 
+		return noiseLessEuclideanDistance + random.gauss(0.0, self.sense_noise)
+
+	def sense(self):
+		robotAndLandmarks = [{'robotX': self.x, 'robotY': self.y, 'landmarkX': landmark[0], 'landmarkY': landmark[1]} for landmark in self.landmarks]
+		return map(self.__distanceRobotToLandmark, robotAndLandmarks)
+
 	def move(self, obj):
 		turn = obj['turn']
 		forward = obj['forward']

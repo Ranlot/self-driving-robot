@@ -27,4 +27,3 @@ print robot.sense()
 robot.move({'turn': - pi / 2, 'forward': 10})
 print robot
 print robot.sense()
-
