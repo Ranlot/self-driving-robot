@@ -1,10 +1,9 @@
-#simple copy paste from class given in online course
-#modified move method not to return new robot but to mutate current robot
-#simplified constructor to avoid code duplication
-#simplified sense function
+#simplified version of class provided in online course
 
 from math import *
 import random
+from scipy.stats import norm
+from operator import mul
 
 class Robot:
 
@@ -16,7 +15,7 @@ class Robot:
         	self.orientation = random.random() * 2.0 * pi
         	self.forward_noise = 0.0
         	self.turn_noise    = 0.0
-        	self.sense_noise   = 0.0
+        	self.sense_noise   = 5.0
 		    
     	def set(self, obj):
 		new_x = obj['x']
@@ -63,30 +62,16 @@ class Robot:
         	x %= self.world_size    # cyclic truncate
         	y %= self.world_size
         
-        	# set particle
-        	#res = robot()
-        	#res.set(x, y, orientation)
-        	#res.set_noise(self.forward_noise, self.turn_noise, self.sense_noise)
-        	#return res
 		self.x = x
 		self.y = y
 		self.orientation = orientation
 		
-    
-    	def Gaussian(self, mu, sigma, x):
-        	# calculates the probability of x for 1-dim Gaussian with mean mu and var. sigma
-        	return exp(- ((mu - x) ** 2) / (sigma ** 2) / 2.0) / sqrt(2.0 * pi * (sigma ** 2))
-    
-    	def measurement_prob(self, measurement):
-        	# calculates how likely a measurement should be
-        	prob = 1.0;
-        	for i in range(len(self.landmarks)):
-            		dist = sqrt((self.x - self.landmarks[i][0]) ** 2 + (self.y - self.landmarks[i][1]) ** 2)
-            		prob *= self.Gaussian(dist, self.sense_noise, measurement[i])
-        	return prob
-    
+	def getParticleWeight(self, robotMeasurement):
+		particleMeasurement = map(lambda landmark: hypot(self.x - landmark[0], self.y - landmark[1]), self.landmarks)
+		gaussianMismatchWeight = norm.pdf(x=particleMeasurement, loc=robotMeasurement, scale=self.sense_noise)
+		return reduce(mul, gaussianMismatchWeight, 1)
     
     	def __repr__(self):
-        	return '[x=%.6s y=%.6s orient=%.6s]' % (str(self.x), str(self.y), str(self.orientation))
+        	return '[x=%.6s y=%.6s heading=%.6s]' % (str(self.x), str(self.y), str(self.orientation))
 
 
