@@ -5,49 +5,76 @@ import random
 from Robot import Robot
 import numpy as np
 
-landmarks  = [[20.0, 20.0], [80.0, 80.0], [20.0, 80.0], [80.0, 20.0]]
+landmarks  = [[0.0, 100.0], [0.0, 0.0], [100.0, 0.0], [100.0, 100.0]]
 worldSize = 100.0
+
+max_steering_angle = pi / 4.0 
+bearing_noise = 0.1 
+steering_noise = 0.1 
+distance_noise = 5.0 
+
+tolerance_xy = 15.0 # Tolerance for localization in the x and y directions.
+tolerance_orientation = 0.25 # Tolerance for orientation.
+
 numbOfParticles = 1000
 
-def eval(r, p):
-	sum = 0.0;
-    	for i in range(len(p)): # calculate mean error
-        	dx = (p[i].x - r.x + (worldSize/2.0)) % worldSize - (worldSize/2.0)
-        	dy = (p[i].y - r.y + (worldSize/2.0)) % worldSize - (worldSize/2.0)
-        	err = sqrt(dx * dx + dy * dy)
-        	sum += err
-    	return sum / float(len(p))
+def extractPositions(particles):
+	x = 0.0
+    	y = 0.0
+    	orientation = 0.0
+    	for i in range(len(particles)):
+        	x += particles[i].x
+        	y += particles[i].y
+        	# orientation is cyclic
+        	orientation += (((particles[i].orientation - particles[0].orientation + pi) % (2.0 * pi)) + particles[0].orientation - pi)
+  	return [x / len(particles), y / len(particles), orientation / len(particles)]
+
+def generate_ground_truth(motions, landmarks, worldSize):
+
+	myrobot = Robot({'landmarks':landmarks, 'worldSize':worldSize})
+    	myrobot.set_noise({'bearing':bearing_noise, 'steering': steering_noise, 'distance': distance_noise})
+
+    	Z = []
+    	T = len(motions)
+
+    	for t in range(T):
+        	myrobot = myrobot.move(motions[t])
+        	Z.append(myrobot.sense())
+    	return [myrobot, Z]
 
 
-#def cyclicDistance(coord1, coord2):
-#	return (coord1 - coord2 + (worldSize/2.0)) % worldSize - (worldSize/2.0)
+def check_output(final_robot, estimated_position):
 
-#def myEval(robot, particles):
-#	dx = map(lambda particle: particle.x, robot.x, particles)
-#	dy = map(lambda particle: particle.y, robot.y, particles)
-#	[x*x for x in dx]
-#	[x*x for x in dy]	
+	error_x = abs(final_robot.x - estimated_position[0])
+    	error_y = abs(final_robot.y - estimated_position[1])
+    	error_orientation = abs(final_robot.orientation - estimated_position[2])
+    	error_orientation = (error_orientation + pi) % (2.0 * pi) - pi
+    	correct = error_x < tolerance_xy and error_y < tolerance_xy and error_orientation < tolerance_orientation
+    	return correct
 
-robot = Robot({'landmarks':landmarks, 'worldSize':worldSize})
-robot = robot.move({'turn': 0.1, 'forward': 5.0})
-robotMeasurement = robot.sense()
+def particleFilter(motions, measurements, N=numbOfParticles):
+	# 1) make particles
+	particles = [Robot({'landmarks':landmarks, 'worldSize':worldSize}) for particle in range(numbOfParticles)]	
+	[particle.set_noise({'bearing': bearing_noise, 'steering': steering_noise, 'distance': distance_noise}) for particle in particles]
 
-particles = [Robot({'landmarks':landmarks, 'worldSize':worldSize}) for particle in range(numbOfParticles)]
-[particle.set_noise({'forward': 0.05, 'turn': 0.05, 'sense': 5.0}) for particle in particles]
 
-print eval(robot, particles)
+	for motion, measurement in zip(motions, measurements):
 
-for timeStamp in range(10):
-	robot = robot.move({'turn': 0.1, 'forward': 5.0})
-	robotMeasurement = robot.sense()
+		particles = [particle.move(motion) for particle in particles]
+		particleWeights = [particle.measurement_prob(measurement) for particle in particles]
+		particleWeights = map(lambda weight: weight / sum(particleWeights), particleWeights)
 
-	particles = [particle.move({'turn': 0.1, 'forward': 5.0}) for particle in particles]
+		particles = np.random.choice(a=particles, size=len(particles), replace=True, p=particleWeights)
 
-	particleWeights = [particle.getParticleWeight(robotMeasurement) for particle in particles]
-	particleWeights = map(lambda weight: weight / sum(particleWeights), particleWeights)
+	return extractPositions(particles)
 
-	particles = np.random.choice(a=particles, size=len(particles), replace=True, p=particleWeights)
-	print eval(robot, particles)
 
-print robot
-print particles[:20]
+motions = [[2. * pi / 20, 12.] for row in range(6)]
+x = generate_ground_truth(motions, landmarks, worldSize)
+final_robot = x[0]
+measurements = x[1]
+estimated_position = particleFilter(motions, measurements)
+
+print 'Ground truth:\t', final_robot
+print 'Particle filter:\t', estimated_position
+print 'Code check:\t', check_output(final_robot, estimated_position)
