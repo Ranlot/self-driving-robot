@@ -21,6 +21,10 @@ listOfVisitedSites = [currentStatus[0]['position']]
 
 extractXandY = lambda position: (position[0], position[1])
 
+def gridShower(grid):
+	for row in grid:	print row
+	print '\n'
+
 def validBoundaryChecker(position):
 	xpos, ypos = extractXandY(position)
 	return (xpos >= 0 and xpos < len(grid)) and (ypos >= 0 and ypos < len(grid[0]))
@@ -48,10 +52,21 @@ def processStatus(status):
 	[listOfVisitedSites.append(site['position']) for site in visitedSites]
 	return visitedSites
 
+weightGrid = [[-1]*6 for x  in range(5)]
+
+xInit, yInit = extractXandY(listOfVisitedSites[0])
+weightGrid[xInit][yInit] = currentStatus[0]['weight']
+
 while True:
 	print currentStatus
+
 	currentStatus = sorted(currentStatus, key=lambda x: x['weight'])
 	currentStatus = sum(map(processStatus, currentStatus), [])
+
+	for status in currentStatus:
+		xpos, ypos = extractXandY(status['position'])
+		weightGrid[xpos][ypos] = status['weight']
+
 
 	if True in [status['position'] == goal for status in currentStatus]:
 		print 'Success', currentStatus		
@@ -61,3 +76,5 @@ while True:
 		print 'Failure to find a path'
 		break	
 
+print '\n'
+gridShower(weightGrid)
