@@ -41,4 +41,4 @@ You can run the demo with:
 python ParticleFilter/runRobot.py
 ```
 
-### 1) Search
+### 2) Search
