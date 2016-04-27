@@ -1,24 +1,32 @@
-from operator import add
+from operator import add, sub
 
+'''
 grid = [[0, 0, 1, 0, 0, 0],
         [0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0],
         [0, 0, 0, 0, 1, 0],
-        [0, 0, 1, 1, 1, 0],
+        [1, 0, 0, 0, 1, 0]]
+'''
+
+grid = [[0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0]]
 
-currentStatus = [{'weight': 0, 'position': [0, 0]}]
-
+metaMoves = [('^', [-1, 0]), ('<', [0, -1]), ('v', [1, 0]), ('>', [0, 1])]
+init = [0, 0]
 goal = [4, 5]
 
 cost = 1
 
-delta = [[-1, 0], # go up
-         [ 0,-1], # go left
-         [ 1, 0], # go down
-         [ 0, 1]] # go right
+currentStatus = [{'weight': 0, 'position': init}]
 
+allowedMoves = [move[1] for move in metaMoves]
 listOfVisitedSites = [currentStatus[0]['position']]
 
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
 extractXandY = lambda position: (position[0], position[1])
 
 def gridShower(grid):
@@ -36,15 +44,16 @@ def gridWallChecker(position):
 def boundaryAndWallChecker(position):
 	return validBoundaryChecker(position) and gridWallChecker(position)
 
-def expandPositions(status):
+def neighborFinder(position):
+	possiblePositions = [map(add, position, move) for move in allowedMoves]
+	boundaryAndWallFilter = filter(boundaryAndWallChecker, possiblePositions)
+	return boundaryAndWallFilter
 
+def expandPositions(status):
 	currentPosition = status['position']
 	currentWeight = status['weight']
-
-	possiblePositions = [map(add, currentPosition, move) for move in delta]
-	boundaryAndWallFilter = filter(boundaryAndWallChecker, possiblePositions)
+	boundaryAndWallFilter = neighborFinder(currentPosition)
 	previouslyVisitedFilter = filter(lambda position: position not in listOfVisitedSites, boundaryAndWallFilter)
-
 	return [{'weight': currentWeight + cost, 'position': position} for position in previouslyVisitedFilter]
 
 def processStatus(status):
@@ -52,29 +61,58 @@ def processStatus(status):
 	[listOfVisitedSites.append(site['position']) for site in visitedSites]
 	return visitedSites
 
+def findBestNeighborAndMove(weightGrid, position):
+	neighbors = map(lambda cell: (weightGrid[cell[0]][cell[1]], cell), neighborFinder(position))
+	neighbors = filter(lambda neighbor: weightGrid[neighbor[1][0]][neighbor[1][1]] != -1, neighbors) #-1 means unexpanded node
+	neighbors.sort()
+	bestNeighbor = neighbors[0][1]
+	bestMove = [move[0] for move in metaMoves if move[1] == map(sub, position, bestNeighbor)]
+	return {'bestNeighbor':bestNeighbor, 'bestMove':bestMove}
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
 weightGrid = [[-1]*6 for x  in range(5)]
 
 xInit, yInit = extractXandY(listOfVisitedSites[0])
 weightGrid[xInit][yInit] = currentStatus[0]['weight']
 
+finalSolvability = 'Undecided'
+
 while True:
-	print currentStatus
+	#print currentStatus
 
 	currentStatus = sorted(currentStatus, key=lambda x: x['weight'])
 	currentStatus = sum(map(processStatus, currentStatus), [])
 
 	for status in currentStatus:
+		
 		xpos, ypos = extractXandY(status['position'])
 		weightGrid[xpos][ypos] = status['weight']
 
-
 	if True in [status['position'] == goal for status in currentStatus]:
-		print 'Success', currentStatus		
+		#print 'Success', currentStatus		
+		finalSolvability = True
 		break
 
 	if len(currentStatus) == 0:
 		print 'Failure to find a path'
+		finalSolvability = False
 		break	
 
-print '\n'
-gridShower(weightGrid)
+#gridShower(weightGrid)
+
+#start backwards propagation
+if finalSolvability:
+
+	pathGrid = [[' ']*6 for x  in range(5)]
+	pathGrid[goal[0]][goal[1]] = '*'
+
+	backTrackPosition = goal
+	while backTrackPosition != init:
+	#for mv in range(10):
+		bestPath = findBestNeighborAndMove(weightGrid, backTrackPosition)
+		backTrackPosition, backTrackMove = bestPath['bestNeighbor'], bestPath['bestMove'][0]
+		pathGrid[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove
+
+	gridShower(pathGrid)
+
