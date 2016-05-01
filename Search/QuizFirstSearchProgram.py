@@ -1,4 +1,5 @@
 from operator import add, sub
+from numpy import abs
 
 '''
 grid = [[0, 0, 1, 0, 0, 0],
@@ -13,6 +14,8 @@ grid = [[0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0]]
+
+nrows, ncols = len(grid), len(grid[0])
 
 metaMoves = [('^', [-1, 0]), ('<', [0, -1]), ('v', [1, 0]), ('>', [0, 1])]
 init = [0, 0]
@@ -68,6 +71,12 @@ def findBestNeighborAndMove(weightGrid, position):
 	bestNeighbor = neighbors[0][1]
 	bestMove = [move[0] for move in metaMoves if move[1] == map(sub, position, bestNeighbor)]
 	return {'bestNeighbor':bestNeighbor, 'bestMove':bestMove}
+
+
+def manhattanDistance(startPosition, targetPosition):
+	return abs(startPosition[0] - targetPosition[0]) + abs(startPosition[1] - targetPosition[1])		
+	
+
 #-----------------------------------------------------------------
 #-----------------------------------------------------------------
 
@@ -99,7 +108,7 @@ while True:
 		finalSolvability = False
 		break	
 
-#gridShower(weightGrid)
+gridShower(weightGrid)
 
 #start backwards propagation
 if finalSolvability:
@@ -115,4 +124,11 @@ if finalSolvability:
 		pathGrid[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove
 
 	gridShower(pathGrid)
+
+
+allManhattanHeuristics = map(lambda x: manhattanDistance(x, goal), [(x, y) for x in range(nrows) for y in range(ncols)])
+naiveManhanttanHeuristics = zip(*[iter(allManhattanHeuristics)] * ncols)
+
+gridShower(naiveManhanttanHeuristics)
+
 
