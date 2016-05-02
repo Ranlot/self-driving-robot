@@ -93,8 +93,7 @@ openSet = [{'weight': naiveManhanttanHeuristics[init[0]][init[1]], 'position': i
 allowedMoves = [move[1] for move in metaMoves]
 closedSet = [openSet[0]['position']]
 
-
-weightGrid = [[-1]*6 for x  in range(5)]
+weightGrid = [[-1] * ncols for x  in range(nrows)]
 
 xInit, yInit = extractXandY(closedSet[0])
 weightGrid[xInit][yInit] = openSet[0]['weight']
