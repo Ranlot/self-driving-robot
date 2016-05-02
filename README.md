@@ -42,3 +42,11 @@ python ParticleFilter/runRobot.py
 ```
 
 ### 2) Search
+
+#### 2.1) A* algorithm
+
+You can run the demo with:
+```
+python Search/aStar.py
+```
+
