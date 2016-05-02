@@ -77,6 +77,8 @@ grid = [[0, 1, 0, 0, 0, 0],
 
 nrows, ncols = len(grid), len(grid[0])
 
+gridShower(grid)
+
 #-----------------------------------------------------------------
 metaMoves = [('^', [-1, 0]), ('<', [0, -1]), ('v', [1, 0]), ('>', [0, 1])]
 init, goal = [0, 0], [4, 5]
@@ -84,7 +86,7 @@ init, goal = [0, 0], [4, 5]
 allManhattanHeuristics = map(lambda x: manhattanDistance(x, goal), [(x, y) for x in range(nrows) for y in range(ncols)])
 naiveManhanttanHeuristics = zip(*[iter(allManhattanHeuristics)] * ncols)
 #naiveManhanttanHeuristics = [[1] * ncols for row in range(nrows)]
-gridShower(naiveManhanttanHeuristics)
+#gridShower(naiveManhanttanHeuristics)
 #-----------------------------------------------------------------
 openSet = [{'weight': naiveManhanttanHeuristics[init[0]][init[1]], 'position': init}]
 
@@ -99,10 +101,10 @@ weightGrid[xInit][yInit] = openSet[0]['weight']
 
 finalSolvability = False
 
-print openSet
+#print openSet
 while True:
 	openSet = expandNodes(openSet)
-	print openSet
+	#print openSet
 	if len(openSet) == 0:
 		print 'Failure to find a path'	
 		break
@@ -111,7 +113,7 @@ while True:
 		break
 
 
-gridShower(weightGrid)
+#gridShower(weightGrid)
 
 #start backwards propagation
 if finalSolvability:
