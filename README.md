@@ -47,6 +47,6 @@ python ParticleFilter/runRobot.py
 
 You can run the demo with:
 ```
-python python Search/aStar.py
+python Search/aStar.py
 ```
 
