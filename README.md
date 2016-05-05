@@ -50,3 +50,16 @@ You can run the demo with:
 python Search/aStar.py
 ```
 
+#### 2.2) Dynamic Programming
+
+Instead of trying to determine the shortest path from a precise starting location to the end location, we may need to know the optimal way to reach the end location from anywhere on the map.  Similarly to the A* algorithm example, we are using a simple cost function all possible displacements are penalized equally.
+
+<p align="center">
+<img src="Search/Illustrations/dynamicProg_1_4.png" width="430"/>
+<img src="Search/Illustrations/dynamicProg_3_1.png" width="430"/>
+</p>
+
+You can run the demo with:
+```
+python Search/dynamicProgramming.py
+```
