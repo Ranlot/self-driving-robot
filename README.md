@@ -63,3 +63,22 @@ You can run the demo with:
 ```
 python Search/dynamicProgramming.py
 ```
+
+#### 2.3) From the perspective of graphs using Neo4j  
+
+All *StreetCorner* nodes are connected to each other via a *Connected* relationship that contains a *timeToNode* property which models the cost associated with driving along a specific relation.  Those properties (and how to construct the graph) are shown in the Cypher query: **Search/Neo4j/dataAndQuery.cypher**.  Running the query below will find the total cost of all directed paths starting at node "A" and ending at node "I" organized from best to worst (see **Search/Neo4j/paths_Neo4j.csv** for complete results).
+
+```cypher
+MATCH           path = (startNode:StreetCorner)-[:Connected*]->(endNode:StreetCorner)
+WHERE           startNode.name="A" AND endNode.name="I"
+RETURN          extract(node in nodes(path) | node.name) AS nameOfNodes,
+                extract(relationship in relationships(path) | relationship.timeToNode) AS timeToNodes,
+                length(path) AS lengthOfPath,
+                reduce(accumulatedTime = 0, relationship in relationships(path) | accumulatedTime + relationship.timeToNode) AS totalWeight
+ORDER BY        totalWeight ASC
+```
+
+<p align="center">
+<img src="Search/Neo4j/graph_Neo4j.png" width="430"/>
+</p>
+
