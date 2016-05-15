@@ -1,14 +1,21 @@
-from operator import add, sub
-from numpy import abs
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
+from operator import add, sub
+import itertools
+import numpy as np
 #-----------------------------------------------------------------
 #-----------------------------------------------------------------
+def flatMap(func, *iterable):
+	return list(itertools.chain.from_iterable(map(func, *iterable)))
+
 def gridShower(grid):
 	for row in grid:	print row
 	print '\n'
 
 def manhattanDistance(startPosition, targetPosition):
-	return abs(startPosition[0] - targetPosition[0]) + abs(startPosition[1] - targetPosition[1])		
+	return np.abs(startPosition[0] - targetPosition[0]) + np.abs(startPosition[1] - targetPosition[1])		
 
 extractXandY = lambda position: (position[0], position[1])
 
@@ -24,7 +31,7 @@ def boundaryAndWallChecker(position):
 	return validBoundaryChecker(position) and gridWallChecker(position)
 
 def neighborFinder(position):
-	possiblePositions = [map(add, position, move) for move in allowedMoves]
+	possiblePositions = [map(add, position, move) for move in metaMoves]
 	boundaryAndWallFilter = filter(boundaryAndWallChecker, possiblePositions)
 	return boundaryAndWallFilter
 
@@ -33,7 +40,8 @@ def expandPositions(status):
 	currentWeight = status['weight']
 	boundaryAndWallFilter = neighborFinder(currentPosition)
 	previouslyVisitedFilter = filter(lambda position: position not in closedSet, boundaryAndWallFilter)
-	return [{'weight': currentWeight + naiveManhanttanHeuristics[position[0]][position[1]], 'position': position} for position in previouslyVisitedFilter]
+	return [{'weight': currentWeight + 1, 'position': position} for position in previouslyVisitedFilter]
+	#return [{'weight': currentWeight + naiveManhanttanHeuristics[position[0]][position[1]], 'position': position} for position in previouslyVisitedFilter]
 
 def processStatus(status):
 	visitedSites = expandPositions(status)
@@ -45,8 +53,9 @@ def findBestNeighborAndMove(weightGrid, position):
 	neighbors = filter(lambda neighbor: weightGrid[neighbor[1][0]][neighbor[1][1]] != -1, neighbors) #-1 means unexpanded node
 	neighbors.sort()
 	bestNeighbor = neighbors[0][1]
-	bestMove = [move[0] for move in metaMoves if move[1] == map(sub, position, bestNeighbor)]
-	return {'bestNeighbor':bestNeighbor, 'bestMove':bestMove}
+	#bestMove = [move[0] for move in metaMoves if move[1] == map(sub, position, bestNeighbor)]
+	#return {'bestNeighbor':bestNeighbor, 'bestMove':bestMove}
+	return {'bestNeighbor':bestNeighbor, 'bestMove':map(sub, position, bestNeighbor)}
 
 def expandNodes(openSet):
 	sortedOpenSet = sorted(openSet, key=lambda x: x['weight'], reverse=False)
@@ -80,8 +89,11 @@ nrows, ncols = len(grid), len(grid[0])
 gridShower(grid)
 
 #-----------------------------------------------------------------
-metaMoves = [('^', [-1, 0]), ('<', [0, -1]), ('v', [1, 0]), ('>', [0, 1])]
+metaMoves = {(-1, 0): ['^', (0, 1)], (0, -1): ['<', (-1, 0)] , (1, 0): ['v', (0, -1)], (0, 1): ['>', (1, 0)]}
+
 init, goal = [0, 0], [4, 5]
+
+goalX, goalY = extractXandY(goal)
 #-----------------------------------------------------------------
 allManhattanHeuristics = map(lambda x: manhattanDistance(x, goal), [(x, y) for x in range(nrows) for y in range(ncols)])
 naiveManhanttanHeuristics = zip(*[iter(allManhattanHeuristics)] * ncols)
@@ -90,7 +102,6 @@ naiveManhanttanHeuristics = zip(*[iter(allManhattanHeuristics)] * ncols)
 #-----------------------------------------------------------------
 openSet = [{'weight': naiveManhanttanHeuristics[init[0]][init[1]], 'position': init}]
 
-allowedMoves = [move[1] for move in metaMoves]
 closedSet = [openSet[0]['position']]
 
 weightGrid = [[-1] * ncols for x  in range(nrows)]
@@ -112,16 +123,49 @@ while True:
 		break
 
 
-#gridShower(weightGrid)
+gridShower(weightGrid)
 
 #start backwards propagation
 if finalSolvability:
-	pathGrid = [[' ']*6 for x  in range(5)]
-	pathGrid[goal[0]][goal[1]] = '*'
+
+	policyMap = [['.'] * ncols for x  in range(nrows)]
+	policyMap[goal[0]][goal[1]] = '*'
+
+	policyMapX = [[0 for row in range(ncols)] for col in range(nrows)]
+	policyMapY = [[0 for row in range(ncols)] for col in range(nrows)]
+
 	backTrackPosition = goal
+
 	while backTrackPosition != init:
 		bestPath = findBestNeighborAndMove(weightGrid, backTrackPosition)
-		backTrackPosition, backTrackMove = bestPath['bestNeighbor'], bestPath['bestMove'][0]
-		pathGrid[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove
-	gridShower(pathGrid)
+		backTrackPosition, backTrackMove = bestPath['bestNeighbor'], metaMoves.get(tuple(bestPath['bestMove']))
+
+		policyMap[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove[0]
+		policyMapX[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove[1][0]
+		policyMapY[backTrackPosition[0]][backTrackPosition[1]] = backTrackMove[1][1]
+
+	gridShower(policyMap)
+
+
+#----------------------------
+allValidCells = flatMap(lambda rowIndex: [(rowIndex, colIndex) for (colIndex, cellValue) in enumerate(grid[rowIndex]) if cellValue == 0], range(nrows))
+wallCells = flatMap(lambda rowIndex: [(rowIndex, colIndex) for (colIndex, cellValue) in enumerate(grid[rowIndex]) if cellValue == 1], range(nrows))
+
+xGrid = np.linspace(0, ncols-1, ncols)
+yGrid = np.linspace(nrows-1, 0, nrows)
+
+plotGridConverter = lambda (x, y): (y, nrows - 1 - x)
+
+convertedGoal = plotGridConverter(goal)
+convertedWallCells = map(plotGridConverter, wallCells)
+
+fig = plt.figure()
+q = plt.quiver(xGrid, yGrid, policyMapX, policyMapY, pivot='middle', headwidth=4, headlength=6, scale=10.)
+#http://www.w3schools.com/colors/colors_names.asp
+plt.text(convertedGoal[0], convertedGoal[1], 'goal', size=18, rotation=0., ha="center", va="center", bbox=dict(boxstyle="roundtooth",ec='limegreen',fc='lime',))
+[plt.text(wall[0], wall[1], 'wall', size=18, rotation=0., ha="center", va="center", bbox=dict(boxstyle="round",ec='salmon',fc='sandybrown',)) for wall in convertedWallCells]
+plt.xlim(-1, ncols); plt.ylim(-1, nrows)
+plt.xticks([]); plt.yticks([])
+fig.savefig('Search/Illustrations/aStar_%d_%d.png' % (goalX, goalY))
+plt.close()
 
