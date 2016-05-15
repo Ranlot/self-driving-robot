@@ -45,6 +45,12 @@ python ParticleFilter/runRobot.py
 
 #### 2.1) A* algorithm
 
+We are using a simple Manhattan-like cost function (L1 norm).
+
+<p align="center">
+<img src="Search/Illustrations/aStar_4_5.png" width="430"/>
+</p>
+
 You can run the demo with:
 ```
 python Search/aStar.py
