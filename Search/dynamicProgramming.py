@@ -63,7 +63,7 @@ nrows, ncols = len(grid), len(grid[0])
 
 init = [0, 0]
 #goal = [nrows-3, ncols-1]
-goal = [3, 1]
+goal = [1, 4]
 
 goalX, goalY = extractXandY(goal)
 
@@ -145,7 +145,7 @@ plt.text(convertedGoal[0], convertedGoal[1], 'goal', size=18, rotation=0., ha="c
 [plt.text(wall[0], wall[1], 'wall', size=18, rotation=0., ha="center", va="center", bbox=dict(boxstyle="round",ec='salmon',fc='sandybrown',)) for wall in convertedWallCells]
 plt.xlim(-1, ncols); plt.ylim(-1, nrows)
 plt.xticks([]); plt.yticks([])
-fig.savefig('Illustrations/dynamicProg_%d_%d.png' % (goalX, goalY))
+fig.savefig('Search/Illustrations/dynamicProg_%d_%d.png' % (goalX, goalY))
 plt.close()
 
 
