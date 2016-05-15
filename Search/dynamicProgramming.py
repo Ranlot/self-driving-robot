@@ -136,7 +136,6 @@ yGrid = np.linspace(ncols-1, 0, ncols)
 plotGridConverter = lambda (x, y): (y, nrows - 1 - x)
 
 convertedGoal = plotGridConverter(goal)
-wallPos = plotGridConverter(wallCells[0])
 convertedWallCells = map(plotGridConverter, wallCells)
 
 fig = plt.figure()
