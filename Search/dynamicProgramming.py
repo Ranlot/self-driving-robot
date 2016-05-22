@@ -96,7 +96,7 @@ while change:
 			neighborX, neighborY = extractXandY(neighbor)
 
 			if not hasFlipped[neighborX][neighborY]:
-				valueGrid[neighborX][neighborY] = valueGrid[originatingX][originatingY] + 1
+				valueGrid[neighborX][neighborY] = valueGrid[originatingX][originatingY] + cost
 				hasFlipped[neighborX][neighborY] = True
 				change = True
 		
