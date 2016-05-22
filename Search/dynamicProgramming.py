@@ -44,10 +44,10 @@ def optimalPolicy(cell):
 		sortedNeighborValues = sorted(neighborValues, key=lambda x: x['goToValue'], reverse=False)
 		bestNeighbor = sortedNeighborValues[0]['goTo']
 		bestMove = tuple(map(sub, bestNeighbor, cell))
-		policyMap[cellX][cellY] = allowedMovesNew[bestMove][0]
+		policyMap[cellX][cellY] = allowedMoves[bestMove][0]
 
-		policyMapX[cellX][cellY] = allowedMovesNew[bestMove][1][0]  #TODO: use only 1 set of allowedMoves
-		policyMapY[cellX][cellY] = allowedMovesNew[bestMove][1][1]  #TODO: use only 1 set of allowedMoves
+		policyMapX[cellX][cellY] = allowedMoves[bestMove][1][0]
+		policyMapY[cellX][cellY] = allowedMoves[bestMove][1][1] 
 
 		hasFlipped[cellX][cellY] = False #mutate back to False to indicate that this cell now has an optimal policy direction
 #-----------------------------------------------------------------
@@ -69,12 +69,7 @@ goalX, goalY = extractXandY(goal)
 
 cost = 1 # the cost associated with moving from a cell to an adjacent one
 
-allowedMoves = [[-1, 0 ], # go up
-         	[ 0, -1], # go left
-         	[ 1, 0 ], # go down
-         	[ 0, 1 ]] # go right
-
-allowedMovesNew = {(-1, 0): ['^', (0, 1)], (0, -1): ['<', (-1, 0)] , (1, 0): ['v', (0, -1)], (0, 1): ['>', (1, 0)]}
+allowedMoves = {(-1, 0): ['^', (0, 1)], (0, -1): ['<', (-1, 0)] , (1, 0): ['v', (0, -1)], (0, 1): ['>', (1, 0)]}
 
 gridShower(grid)
 
