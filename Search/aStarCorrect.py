@@ -26,26 +26,23 @@ def flatMap(func, *iterable):
 def closedCellsPerRow(row):
 	return [(row, pos) for pos, val in enumerate(grid[row]) if val == 1]
 
-def validBoundaryChecker(x, y):
+def validBoundaryChecker(currentCell):
+	x, y = currentCell
 	return (x >= 0 and x < len(grid)) and (y >= 0 and y < len(grid[0]))
 
-def validCell(x, y, closedCells):
-	return validBoundaryChecker(x, y) and (x, y) not in closedCells
+def validCell(currentCell, closedCells):
+	return validBoundaryChecker(currentCell) and currentCell not in closedCells
 
-def validNeighbors(x, y, closedCells):
-	potentialNeighbors = [tuple(map(add, [x, y], move)) for move in metaMoves]
-	return filter(lambda pos: validCell(pos[0], pos[1], closedCells), potentialNeighbors)
+def validNeighbors(currentCell, closedCells):
+	potentialNeighbors = [tuple(map(add, [currentCell[0], currentCell[1]], move)) for move in metaMoves]
+	return filter(lambda potentialNeighbor: validCell(potentialNeighbor, closedCells), potentialNeighbors)
 
 def manhattanHeuristicCost(current, goal):
 	return np.abs(current[0] - goal[0]) + np.abs(current[1] - goal[1])	
-	#return 0
 
 if __name__ == "__main__":
 
 	gScoreValues, fScoreValues, cameFrom = {}, {}, {}
-
-	#1) set the walls as closed cells (closed = True)
-	#closedCells = map(initalWallCloser, grid)
 
 	closedCells = flatMap(closedCellsPerRow, range(len(grid)))
 
@@ -54,38 +51,30 @@ if __name__ == "__main__":
 	
 	openCells = [init]
 		
-	#closedcells[init[0]][init[1]] = true
-	closedCells.append(init)
-
 	#while True:
 	for mv in range(25):
 
-		#a) pick the best cell according to fCost
-		currentCell = min(fScoreValues, key=lambda neighbor: fScoreValues[neighbor])		
-		print currentCell
-
-		print closedCells
-		print '\n'
-
-		#b) if this cell is the final cell, we are done
-		if currentCell == goal:
-			print "finished"
-			#closedCells[goal[0]][goal[1]] = True
-			closedCells.append(goal)
-			print gScoreValues
+		if len(openCells) == 0:
+			print 'path does not exist'
 			break
 
-		#c) otherwise, remove current cell from open list and set it to closed
+		#a) pick the best cell according to fCost
+		currentCell = min(fScoreValues, key=lambda cell: fScoreValues[cell])		
+
+		if currentCell == goal:
+			print "finished"
+			closedCells.append(goal)
+			break
+
+		#b) otherwise, remove current cell from open list and set it to closed
 		openCells.remove(currentCell)
 		fScoreValues.pop(currentCell)	
 		
-		currentX, currentY = currentCell
-		#closedCells[currentX][currentY] = True
+		#c) find all the neighbors of current cell
+		allNeighbors = validNeighbors(currentCell, closedCells)
+
+		#d) add the current cell to the list of closed cells
 		closedCells.append(currentCell)
-	
-		#d) find all the neighbors of current cell
-		allNeighbors = validNeighbors(currentX, currentY, closedCells)
-		#allNeighbors = validNeighbors(currentX, currentY, closedCells)
 
 		for neighbor in allNeighbors:
 
